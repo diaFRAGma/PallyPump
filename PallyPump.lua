@@ -1,6 +1,8 @@
-local actionSlotWithFlashHeal = 1;
-local lichtblitzSchwelle = 1;
-local heiligesLichtSchwelle = 1500;
+local actionSlotWithFlashHeal = 1
+local lichtblitzSchwelle = 1
+local heiligesLichtSchwelle = 1500
+local unitToHeal = "nobody"
+local losMerker = nil
 
 function PallyPump()
 	-- Göttliche Gunst  0 = kein CD
@@ -8,27 +10,27 @@ function PallyPump()
 	-- Göttliche Gunst >0 = hat noch CD
 	local gg = getCooldown("Göttliche Gunst")
 	
-	local unitId = getMemberToHeal()
-	if unitId ~= "nobody" then
-		DEFAULT_CHAT_FRAME:AddMessage(UnitName(unitId).." wird geheilt.")
+	getMemberToHeal()
+	if unitToHeal ~= "nobody" then
+		DEFAULT_CHAT_FRAME:AddMessage(UnitName(unitToHeal).." wird geheilt.")
 	else
 		DEFAULT_CHAT_FRAME:AddMessage("Niemand braucht Heilung.")
 	end
 	
-	if unitId ~= "nobody" then
-		local max_health = UnitHealthMax(unitId);
-		local health = UnitHealth(unitId);
+	if unitToHeal ~= "nobody" then
+		local max_health = UnitHealthMax(unitToHeal);
+		local health = UnitHealth(unitToHeal);
 		local diff = max_health-health;
 		if diff >= heiligesLichtSchwelle then
 			if gg == 0 then
 				CastSpellByName("G\195\182ttliche Gunst")
 			elseif gg == -1 or gg > 0 then
-				TargetUnit(unitId)
+				TargetUnit(unitToHeal)
 				CastSpellByName("Heiliges Licht")
 				TargetLastTarget()
 			end
 		elseif diff >= lichtblitzSchwelle then
-			TargetUnit(unitId)
+			TargetUnit(unitToHeal)
 			CastSpellByName("Lichtblitz")
 			TargetLastTarget()
 		end
@@ -63,7 +65,6 @@ end
 
 function getMemberToHeal()
 	local healthToHeal = 0;
-	local unitToHeal = "nobody";
 	if UnitInRaid("player") then
 		-- Der Spieler ist in einem Raid.
 		for raidIndex = 1, MAX_RAID_MEMBERS do
@@ -109,7 +110,27 @@ function getMemberToHeal()
 		--DEFAULT_CHAT_FRAME:AddMessage("?: "..name.." ("..health.."/"..max_health..") = "..max_health-health)
 	else
 		-- Der Spieler ist allein.
-		unitToHeal = "player"
+		if UnitHealthMax("player")-UnitHealth("player") > 0 then
+			unitToHeal = "player"
+		end
 	end
-	return unitToHeal
 end
+
+function PallyPump_OnEvent()
+	if event == "UI_ERROR_MESSAGE" and arg1 == "Ziel ist nicht im Sichtfeld." then
+		--DEFAULT_CHAT_FRAME:AddMessage(UnitName(unitToHeal).." - "..arg1)
+		SendChatMessage("Heilung fehlgeschlagen. Grund: Nicht im Sichtfeld", "WHISPER", nil, UnitName(unitToHeal))
+		--für nächste runde ignorieren
+	end
+end
+
+local PallyPumpFrame = CreateFrame("FRAME", nil, UIParent)
+PallyPumpFrame:Hide()
+PallyPumpFrame:SetScript("OnEvent", PallyPump_OnEvent)
+PallyPumpFrame:RegisterEvent("UNIT_SPELLCAST_SENT")
+PallyPumpFrame:RegisterEvent("UNIT_SPELLCAST_FAILED")
+PallyPumpFrame:RegisterEvent("UNIT_SPELLCAST_FAILED_QUIET")
+PallyPumpFrame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+PallyPumpFrame:RegisterEvent("UNIT_SPELLCAST_STOP")
+PallyPumpFrame:RegisterEvent("UNIT_SPELLCAST_CHANNELED_STOP")
+PallyPumpFrame:RegisterEvent("UI_ERROR_MESSAGE")
