@@ -1,0 +1,7 @@
+## Interface: 11200
+## Title: PallyPump 1.0
+## Version: 1.0
+## Notes: Decides which skill the paladin uses.
+## Notes-deDE: Entscheidet welche Fähigkeit vom Holy Paladin genutzt wird.
+## Author: Ambro
+PallyPump.lua
