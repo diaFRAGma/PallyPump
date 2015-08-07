@@ -7,14 +7,14 @@ Wenn das Makro durch betätigen des Knopfes ausgelöst wird, laufen folgende Entsc
 1. Es wird analysiert ob man in einem Raid, in einer Gruppe oder allein unterwegs ist.
 2. Es werden alle Mitglieder der Gruppe oder des Raids durchlaufen und der rausgepickt, der am meißten Schaden genommen hat.
 3. Dabei werden tote, unsichtbare, Spieler die offline sind und Spieler die out of range sind gefiltert.
-4. Dann wird anhand der Swellenwerte die vorgegeben wurden entschieden welche Heilung genutzt wird.
-5. Bei einer großen Heilung wird versucht Göttliche Gunst mit zu nutzen.
+4. Wenn ein Spieler zwar in Range ist aber nicht in Sight, dann kommt er für x Sekunden auf eine Ignoreliste.
+5. Dann wird anhand der Schwellenwerte die vorgegeben wurden entschieden welche Heilung genutzt wird.
+6. Eine große Heilung wird nur in Kombination mit Göttliche Gunst durchgeführt.
 
 Zukünftige Features?:
 - Wenn man out of fight ist wird automatsich ein Spieler der tot ist und in Reichweite wiederbelebt.
 - Wenn das Mana ausgeht wird ein Manatrank genommen.
 - In riskanten Phasen wird ein Trinket gezündet.
-- Große Heilungen werden nur benutzt wenn Göttliche Gunst bereit ist.
 
 Nützliche Links:
 World of Warcraft 1.12.1 API
