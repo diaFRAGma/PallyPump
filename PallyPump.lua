@@ -1,4 +1,4 @@
-local actionSlotWithFlashHeal = 1
+local actionSlotWithFlashHeal = 25
 local lichtblitzSchwelle = 1
 local heiligesLichtSchwelle = 1500
 local unitToHeal = "nobody"
@@ -16,11 +16,11 @@ function PallyPump()
 		local gg = getCooldown("Göttliche Gunst")
 	
 		setUnitToHeal()
-		--if unitToHeal ~= "nobody" then
-			--DEFAULT_CHAT_FRAME:AddMessage(UnitName(unitToHeal).." wird geheilt.")
-		--else
-			--DEFAULT_CHAT_FRAME:AddMessage("Niemand braucht Heilung.")
-		--end
+		if unitToHeal ~= "nobody" then
+			DEFAULT_CHAT_FRAME:AddMessage(UnitName(unitToHeal).." wird geheilt.")
+		else
+			DEFAULT_CHAT_FRAME:AddMessage("Niemand braucht Heilung.")
+		end
 	
 		if unitToHeal ~= "nobody" then
 			local max_health = UnitHealthMax(unitToHeal)
@@ -36,7 +36,7 @@ function PallyPump()
 				else
 					TargetUnit(unitToHeal)
 					CastSpellByName("Lichtblitz")
-					TargetLastTarget()				
+					TargetLastTarget()
 				end
 			elseif diff >= lichtblitzSchwelle then
 				TargetUnit(unitToHeal)
@@ -129,9 +129,9 @@ function setUnitToHeal()
 end
 
 function PallyPump_OnEvent()
-	if event == "UI_ERROR_MESSAGE" and arg1 == "Ziel ist nicht im Sichtfeld." then
+	if event == "UI_ERROR_MESSAGE" and arg1 == "Ziel ist nicht im Sichtfeld." and unitToHeal ~= "nobody" then
 		--DEFAULT_CHAT_FRAME:AddMessage(UnitName(unitToHeal).." - "..arg1)
-		SendChatMessage("Du bist nicht im Sichtfeld und somit 10 Sekunden auf Heal-Ignore", "WHISPER", nil, UnitName(unitToHeal))
+		--SendChatMessage("Du bist nicht im Sichtfeld und somit 10 Sekunden auf Heal-Ignore", "WHISPER", nil, UnitName(unitToHeal))
 		ignoreList[UnitName(unitToHeal)] = time()
 		DEFAULT_CHAT_FRAME:AddMessage(UnitName(unitToHeal).." wird für "..ignoreTime.." Sekunden ignoriert.")
 	end
@@ -152,10 +152,4 @@ end
 local PallyPumpFrame = CreateFrame("FRAME", nil, UIParent)
 PallyPumpFrame:Hide()
 PallyPumpFrame:SetScript("OnEvent", PallyPump_OnEvent)
-PallyPumpFrame:RegisterEvent("UNIT_SPELLCAST_SENT")
-PallyPumpFrame:RegisterEvent("UNIT_SPELLCAST_FAILED")
-PallyPumpFrame:RegisterEvent("UNIT_SPELLCAST_FAILED_QUIET")
-PallyPumpFrame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
-PallyPumpFrame:RegisterEvent("UNIT_SPELLCAST_STOP")
-PallyPumpFrame:RegisterEvent("UNIT_SPELLCAST_CHANNELED_STOP")
 PallyPumpFrame:RegisterEvent("UI_ERROR_MESSAGE")
