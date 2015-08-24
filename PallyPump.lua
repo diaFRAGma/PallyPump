@@ -39,9 +39,15 @@ function PallyPump()
 					TargetLastTarget()
 				end
 			elseif diff >= lichtblitzSchwelle then
-				TargetUnit(unitToHeal)
-				CastSpellByName("Lichtblitz")
-				TargetLastTarget()
+				if gg == -1 then
+					TargetUnit(unitToHeal)
+					CastSpellByName("Heiliges Licht")
+					TargetLastTarget()
+				else
+					TargetUnit(unitToHeal)
+					CastSpellByName("Lichtblitz")
+					TargetLastTarget()
+				end
 			end
 		end
 	else
