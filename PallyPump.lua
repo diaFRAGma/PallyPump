@@ -4,8 +4,7 @@ local heiligesLichtSchwelle = 1500
 local unitToHeal = "nobody"
 local ignoreTime = 10 -- Sekunden
 local ignoreList = {}
-
---TODO prüfen ob auf Slot 1 auch Lichtblitz ist ansonsten fehler ausgeben
+local debugMode = true
 
 function PallyPump()
 	if GetActionTexture(actionSlotWithFlashHeal) == "Interface\\Icons\\Spell_Holy_FlashHeal" and ActionHasRange(actionSlotWithFlashHeal) == 1 then
@@ -16,9 +15,7 @@ function PallyPump()
 		local gg = getCooldown("Göttliche Gunst")
 	
 		setUnitToHeal()
-		if unitToHeal ~= "nobody" then
-			DEFAULT_CHAT_FRAME:AddMessage(UnitName(unitToHeal).." wird geheilt.")
-		else
+		if unitToHeal == "nobody" and debugMode then
 			DEFAULT_CHAT_FRAME:AddMessage("Niemand braucht Heilung.")
 		end
 	
@@ -51,9 +48,8 @@ function PallyPump()
 			end
 		end
 	else
-		DEFAULT_CHAT_FRAME:AddMessage("PallyPump konnte auf Slot "..actionSlotWithFlashHeal.." kein Lichtblitz finden." , 1.0, 0.0, 0.0)
+		DEFAULT_CHAT_FRAME:AddMessage("PallyPump konnte auf Slot "..actionSlotWithFlashHeal.." kein Lichtblitz finden.", 1.0, 0.0, 0.0)
 	end
-	--DEFAULT_CHAT_FRAME:AddMessage("Debug")
 end
 
 function getCooldown(pSpell)
@@ -134,24 +130,29 @@ function setUnitToHeal()
 	end
 end
 
+function cleanLosList()
+	for key,value in pairs(ignoreList) do
+		-- Wenn der Spieler seit x Sekunden oder mehr auf der Ignoreliste war wird er von dieser entfernt
+		if time() - value >= ignoreTime then
+			ignoreList[key] = nil
+			DEFAULT_CHAT_FRAME:AddMessage(key.." wird nun nicht mehr ignoriert.", 0.0, 1.0, 0.0)
+		end
+	end
+end
+
+function deleteAllPlayerFromIgnoreList()
+	for key,value in pairs(ignoreList) do
+		ignoreList[key] = nil
+		DEFAULT_CHAT_FRAME:AddMessage(key.." wird nun nicht mehr ignoriert.", 0.0, 1.0, 0.0)
+	end
+end
+
 function PallyPump_OnEvent()
 	if event == "UI_ERROR_MESSAGE" and arg1 == "Ziel ist nicht im Sichtfeld." and unitToHeal ~= "nobody" then
 		--DEFAULT_CHAT_FRAME:AddMessage(UnitName(unitToHeal).." - "..arg1)
 		--SendChatMessage("Du bist nicht im Sichtfeld und somit 10 Sekunden auf Heal-Ignore", "WHISPER", nil, UnitName(unitToHeal))
 		ignoreList[UnitName(unitToHeal)] = time()
-		DEFAULT_CHAT_FRAME:AddMessage(UnitName(unitToHeal).." wird für "..ignoreTime.." Sekunden ignoriert.")
-	end
-end
-
-function cleanLosList()
-	local i = 0
-	for key,value in pairs(ignoreList) do
-		-- Wenn der Spieler seit x Sekunden oder mehr auf der Ignoreliste war wird er von dieser entfernt
-		if time() - value >= ignoreTime then
-			ignoreList[key] = nil
-			DEFAULT_CHAT_FRAME:AddMessage(key.." wird nun nicht mehr ignoriert.")
-		end
-		i = i + 1
+		DEFAULT_CHAT_FRAME:AddMessage(UnitName(unitToHeal).." wird für "..ignoreTime.." Sekunden ignoriert.", 1.0, 0.0, 0.0)
 	end
 end
 
@@ -159,3 +160,21 @@ local PallyPumpFrame = CreateFrame("FRAME", nil, UIParent)
 PallyPumpFrame:Hide()
 PallyPumpFrame:SetScript("OnEvent", PallyPump_OnEvent)
 PallyPumpFrame:RegisterEvent("UI_ERROR_MESSAGE")
+
+function PallyLog_OnEvent()
+	if arg1 == "HEAL" and arg2 == UnitName("player") and unitToHeal ~= "nobody" and debugMode then
+		local need = UnitHealthMax(unitToHeal)-UnitHealth(unitToHeal)
+		if need > tonumber(arg3) then
+			DEFAULT_CHAT_FRAME:AddMessage(UnitName(unitToHeal).." braucht "..need.." HP. "..arg3.." geheilt. Er braucht noch "..need-arg3.." HP.", 0.0, 1.0, 0.0)
+		elseif need < tonumber(arg3) then
+			DEFAULT_CHAT_FRAME:AddMessage(UnitName(unitToHeal).." braucht "..need.." HP. "..arg3.." geheilt. "..arg3-need.." HP überheilt.", 0.0, 1.0, 0.0)
+		else
+			DEFAULT_CHAT_FRAME:AddMessage(UnitName(unitToHeal).." braucht "..need.." HP. "..arg3.." geheilt.", 0.0, 1.0, 0.0)
+		end
+	end
+end
+
+local PallyLogFrame = CreateFrame("FRAME", nil, UIParent)
+PallyLogFrame:Hide()
+PallyLogFrame:SetScript("OnEvent", PallyLog_OnEvent)
+PallyLogFrame:RegisterEvent("COMBAT_TEXT_UPDATE")
