@@ -147,6 +147,111 @@ function deleteAllPlayerFromIgnoreList()
 	end
 end
 
+function skillHoly()
+	-- Heilig
+	-- Göttliche Weisheit 5/5
+	name, iconPath, tier, column, currentRank, maxRank, isExceptional, meetsPrereq = GetTalentInfo(1, 2)
+	if currentRank < 5 then LearnTalent(1, 2) end
+	-- Spiritueller Fokus 5/5
+	name, iconPath, tier, column, currentRank, maxRank, isExceptional, meetsPrereq = GetTalentInfo(1, 3)
+	if currentRank < 5 then LearnTalent(1, 3) end
+	-- Heilendes Licht 3/3
+	name, iconPath, tier, column, currentRank, maxRank, isExceptional, meetsPrereq = GetTalentInfo(1, 5)
+	if currentRank < 3 then LearnTalent(1, 5) end
+	-- Weihe 1/1
+	name, iconPath, tier, column, currentRank, maxRank, isExceptional, meetsPrereq = GetTalentInfo(1, 6)
+	if currentRank < 1 then LearnTalent(1, 6) end
+	-- Unumstößlicher Glaube 2/2
+	name, iconPath, tier, column, currentRank, maxRank, isExceptional, meetsPrereq = GetTalentInfo(1, 8)
+	if currentRank < 2 then LearnTalent(1, 8) end
+	-- Illumination 5/5
+	name, iconPath, tier, column, currentRank, maxRank, isExceptional, meetsPrereq = GetTalentInfo(1, 9)
+	if currentRank < 5 then LearnTalent(1, 9) end
+	-- Verbesserter Segen der Weisheit 2/2
+	name, iconPath, tier, column, currentRank, maxRank, isExceptional, meetsPrereq = GetTalentInfo(1, 10)
+	if currentRank < 2 then LearnTalent(1, 10) end
+	-- Göttliche Gunst 1/1
+	name, iconPath, tier, column, currentRank, maxRank, isExceptional, meetsPrereq = GetTalentInfo(1, 11)
+	if currentRank < 1 then LearnTalent(1, 11) end
+	-- Dauerhaftes Richturteil 3/3
+	name, iconPath, tier, column, currentRank, maxRank, isExceptional, meetsPrereq = GetTalentInfo(1, 12)
+	if currentRank < 3 then LearnTalent(1, 12) end
+	-- Heilige Macht 5/5
+	name, iconPath, tier, column, currentRank, maxRank, isExceptional, meetsPrereq = GetTalentInfo(1, 13)
+	if currentRank < 5 then LearnTalent(1, 13) end
+	-- Heiliger Schock 1/1
+	name, iconPath, tier, column, currentRank, maxRank, isExceptional, meetsPrereq = GetTalentInfo(1, 14)
+	if currentRank < 1 then LearnTalent(1, 14) end
+	
+	-- Schutz
+	-- Verbesserte Aura der Hingabe 5/5
+	name, iconPath, tier, column, currentRank, maxRank, isExceptional, meetsPrereq = GetTalentInfo(2, 1)
+	if currentRank < 5 then LearnTalent(2, 1) end
+	-- Präzision 3/3
+	name, iconPath, tier, column, currentRank, maxRank, isExceptional, meetsPrereq = GetTalentInfo(2, 3)
+	if currentRank < 3 then LearnTalent(2, 3) end
+	-- Gunst des Hüters 2/2
+	name, iconPath, tier, column, currentRank, maxRank, isExceptional, meetsPrereq = GetTalentInfo(2, 4)
+	if currentRank < 2 then LearnTalent(2, 4) end
+	-- Segen der Könige 1/1
+	name, iconPath, tier, column, currentRank, maxRank, isExceptional, meetsPrereq = GetTalentInfo(2, 6)
+	if currentRank < 1 then LearnTalent(2, 6) end
+	
+	-- Vergeltung
+	-- Verbesserter Segen der Macht 5/5
+	name, iconPath, tier, column, currentRank, maxRank, isExceptional, meetsPrereq = GetTalentInfo(3, 1)
+	if currentRank < 5 then LearnTalent(3, 1) end
+	-- Verbessertes Richturteil 2/2
+	name, iconPath, tier, column, currentRank, maxRank, isExceptional, meetsPrereq = GetTalentInfo(3, 3)
+	if currentRank < 2 then LearnTalent(3, 3) end
+	
+	-- Skills in die Leiste packen
+	-- Weihe Rang 5
+	name, iconPath, tier, column, currentRank, maxRank, isExceptional, meetsPrereq = GetTalentInfo(1, 6)
+	if currentRank == 1 and HasAction(27) == nil then
+		PickupSpell(getSpellId("Weihe", "Rang 5"), BOOKTYPE_SPELL)
+		PlaceAction(27)
+	end
+	-- Heiliger Schock
+	name, iconPath, tier, column, currentRank, maxRank, isExceptional, meetsPrereq = GetTalentInfo(1, 14)
+	if currentRank == 1 and HasAction(4) == nil then
+		PickupSpell(getSpellId("Heiliger Schock", "Rang 3"), BOOKTYPE_SPELL)
+		PlaceAction(4)
+	end
+	-- Segen der Könige und Großer Segen der Könige
+	name, iconPath, tier, column, currentRank, maxRank, isExceptional, meetsPrereq = GetTalentInfo(2, 6)
+	if currentRank == 1 then
+		if HasAction(12) == nil then
+			PickupSpell(getSpellId("Segen der K\195\182nige", ""), BOOKTYPE_SPELL)
+			PlaceAction(12)
+		end
+		if HasAction(22) == nil then
+			PickupSpell(getSpellId("Gro\195\159er Segen der K\195\182nige", ""), BOOKTYPE_SPELL)
+			PlaceAction(22)
+		end
+	end
+end
+
+function skillRetribution()
+end
+
+function skillProtection()
+end
+
+function getSpellId(pSpellName, pSpellRank)
+	local i = 1
+	while true do
+		local spellName, spellRank = GetSpellName(i, BOOKTYPE_SPELL)
+		if not spellName then
+			do break end
+		end
+		if spellName == pSpellName and spellRank == pSpellRank then
+			return i
+		end
+		i = i + 1
+	end
+end
+
 function PallyPump_OnEvent()
 	if event == "UI_ERROR_MESSAGE" and arg1 == "Ziel ist nicht im Sichtfeld." and unitToHeal ~= "nobody" then
 		--DEFAULT_CHAT_FRAME:AddMessage(UnitName(unitToHeal).." - "..arg1)
