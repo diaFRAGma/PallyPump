@@ -1,55 +1,82 @@
-local actionSlotWithFlashHeal = 25
+local actionSlotWithFlashHeal = 0
+local actionSlotWithHolyLight = 0
 local lichtblitzSchwelle = 1
 local heiligesLichtSchwelle = 1500
 local unitToHeal = "nobody"
 local ignoreTime = 10 -- Sekunden
 local ignoreList = {}
 local debugMode = true
+local isWorking = false
+local isCasting = false
 
 function PallyPump()
-	if GetActionTexture(actionSlotWithFlashHeal) == "Interface\\Icons\\Spell_Holy_FlashHeal" and ActionHasRange(actionSlotWithFlashHeal) == 1 then
-		cleanLosList()
-		-- Göttliche Gunst  0 = kein CD
-		-- Göttliche Gunst -1 = Buff ist Aktiv (CD wird erst gestartet wenn verbraucht)
-		-- Göttliche Gunst >0 = hat noch CD
-		local gg = getCooldown("Göttliche Gunst")
-	
-		setUnitToHeal()
-		if unitToHeal == "nobody" and debugMode then
-			DEFAULT_CHAT_FRAME:AddMessage("Niemand braucht Heilung.")
+	for i = 1, 108 do
+		if GetActionTexture(i) == "Interface\\Icons\\Spell_Holy_FlashHeal" and GetActionText(i) == nil then
+			actionSlotWithFlashHeal = i
 		end
+		if GetActionTexture(i) == "Interface\\Icons\\Spell_Holy_HolyBolt" and GetActionText(i) == nil then
+			actionSlotWithHolyLight = i
+		end
+	end
+	if actionSlotWithFlashHeal == 0 then
+		DEFAULT_CHAT_FRAME:AddMessage("PallyPump konnte Lichtblitz nicht in der Aktionsleiste finden.", 1.0, 0.0, 0.0)
+	end
+	if actionSlotWithHolyLight == 0 then
+		DEFAULT_CHAT_FRAME:AddMessage("PallyPump konnte Heiliges Licht nicht in der Aktionsleiste finden.", 1.0, 0.0, 0.0)
+	end	
+	isFlashHealCurrent = IsCurrentAction(actionSlotWithFlashHeal)
+	isHolyLightCurrent = IsCurrentAction(actionSlotWithHolyLight)
+	if isFlashHealCurrent == 1 or isHolyLightCurrent == 1 then
+		isCasting = true
+	else
+		isCasting = false
+	end
+	if isWorking == false and isCasting == false then
+		isWorking = true
+	else
+		return
+	end
+
+	cleanLosList()
+	-- Göttliche Gunst  0 = kein CD
+	-- Göttliche Gunst -1 = Buff ist Aktiv (CD wird erst gestartet wenn verbraucht)
+	-- Göttliche Gunst >0 = hat noch CD
+	local gg = getCooldown("Göttliche Gunst")
 	
-		if unitToHeal ~= "nobody" then
-			local max_health = UnitHealthMax(unitToHeal)
-			local health = UnitHealth(unitToHeal)
-			local diff = max_health-health
-			if diff >= heiligesLichtSchwelle then
-				if gg == 0 then
-					CastSpellByName("G\195\182ttliche Gunst")
-				elseif gg == -1 then
-					TargetUnit(unitToHeal)
-					CastSpellByName("Heiliges Licht")
-					TargetLastTarget()
-				else
-					TargetUnit(unitToHeal)
-					CastSpellByName("Lichtblitz")
-					TargetLastTarget()
-				end
-			elseif diff >= lichtblitzSchwelle then
-				if gg == -1 then
-					TargetUnit(unitToHeal)
-					CastSpellByName("Heiliges Licht")
-					TargetLastTarget()
-				else
-					TargetUnit(unitToHeal)
-					CastSpellByName("Lichtblitz")
-					TargetLastTarget()
-				end
+	setUnitToHeal()
+	if unitToHeal == "nobody" and debugMode then
+		DEFAULT_CHAT_FRAME:AddMessage("Niemand braucht Heilung.")
+	end
+	
+	if unitToHeal ~= "nobody" then
+		local max_health = UnitHealthMax(unitToHeal)
+		local health = UnitHealth(unitToHeal)
+		local diff = max_health-health
+		if diff >= heiligesLichtSchwelle then
+			if gg == 0 then
+				CastSpellByName("G\195\182ttliche Gunst")
+			elseif gg == -1 then
+				TargetUnit(unitToHeal)
+				CastSpellByName("Heiliges Licht")
+				TargetLastTarget()
+			else
+				TargetUnit(unitToHeal)
+				CastSpellByName("Lichtblitz")
+				TargetLastTarget()
+			end
+		elseif diff >= lichtblitzSchwelle then
+			if gg == -1 then
+				TargetUnit(unitToHeal)
+				CastSpellByName("Heiliges Licht")
+				TargetLastTarget()
+			else
+				TargetUnit(unitToHeal)
+				CastSpellByName("Lichtblitz")
+				TargetLastTarget()
 			end
 		end
-	else
-		DEFAULT_CHAT_FRAME:AddMessage("PallyPump konnte auf Slot "..actionSlotWithFlashHeal.." kein Lichtblitz finden.", 1.0, 0.0, 0.0)
 	end
+	isWorking = false
 end
 
 function getCooldown(pSpell)
@@ -92,7 +119,6 @@ function setUnitToHeal()
 					healthToHeal = max_health-health
 					unitToHeal = "raid"..raidIndex
 				end
-				TargetLastTarget()
 				--DEFAULT_CHAT_FRAME:AddMessage(raidIndex..": "..name.." ("..health.."/"..max_health..") = "..max_health-health)			
 			end
 		end
@@ -109,7 +135,6 @@ function setUnitToHeal()
 					healthToHeal = max_health-health
 					unitToHeal = "party"..groupIndex
 				end
-				TargetLastTarget()
 				--DEFAULT_CHAT_FRAME:AddMessage(groupIndex..": "..name.." ("..health.."/"..max_health..") = "..max_health-health)
 			end
 		end
