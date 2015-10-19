@@ -45,7 +45,7 @@ function PallyPump()
 	
 	setUnitToHeal()
 	if unitToHeal == "nobody" and debugMode then
-		DEFAULT_CHAT_FRAME:AddMessage("Niemand braucht Heilung.")
+		UIErrorsFrame:AddMessage("Niemand braucht Heilung.", 1.0, 1.0, 1.0, nil, 5);
 	end
 	
 	if unitToHeal ~= "nobody" then
@@ -160,7 +160,7 @@ function cleanLosList()
 		-- Wenn der Spieler seit x Sekunden oder mehr auf der Ignoreliste war wird er von dieser entfernt
 		if time() - value >= ignoreTime then
 			ignoreList[key] = nil
-			DEFAULT_CHAT_FRAME:AddMessage(key.." wird nun nicht mehr ignoriert.", 0.0, 1.0, 0.0)
+			UIErrorsFrame:AddMessage(key.." wird nun nicht mehr ignoriert.", 0.0, 1.0, 0.0, nil, 5);
 		end
 	end
 end
@@ -168,7 +168,7 @@ end
 function deleteAllPlayerFromIgnoreList()
 	for key,value in pairs(ignoreList) do
 		ignoreList[key] = nil
-		DEFAULT_CHAT_FRAME:AddMessage(key.." wird nun nicht mehr ignoriert.", 0.0, 1.0, 0.0)
+		UIErrorsFrame:AddMessage(key.." wird nun nicht mehr ignoriert.", 0.0, 1.0, 0.0, nil, 5);
 	end
 end
 
@@ -282,7 +282,7 @@ function PallyPump_OnEvent()
 		--DEFAULT_CHAT_FRAME:AddMessage(UnitName(unitToHeal).." - "..arg1)
 		--SendChatMessage("Du bist nicht im Sichtfeld und somit 10 Sekunden auf Heal-Ignore", "WHISPER", nil, UnitName(unitToHeal))
 		ignoreList[UnitName(unitToHeal)] = time()
-		DEFAULT_CHAT_FRAME:AddMessage(UnitName(unitToHeal).." wird für "..ignoreTime.." Sekunden ignoriert.", 1.0, 0.0, 0.0)
+		UIErrorsFrame:AddMessage(UnitName(unitToHeal).." wird für "..ignoreTime.." Sekunden ignoriert.", 1.0, 0.0, 0.0, nil, 5);
 	end
 end
 
