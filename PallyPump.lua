@@ -294,14 +294,21 @@ PallyPumpFrame:SetScript("OnEvent", PallyPump_OnEvent)
 PallyPumpFrame:RegisterEvent("UI_ERROR_MESSAGE")
 
 function PallyLog_OnEvent()
-	if arg1 == "HEAL" and arg2 == UnitName("player") and unitToHeal ~= "nobody" and debugMode then
+	local value = 0
+	for attacktype, creaturename, damage in string.gfind(arg1, "Kritische Heilung: (.+) heilt (.+) um (%d+) Punkte.") do
+		value = damage
+	end
+	for attacktype, creaturename, damage in string.gfind(arg1, "(.+) heilt (.+) um (%d+) Punkte.") do
+		value = damage
+	end
+	if unitToHeal ~= "nobody" and debugMode then
 		local need = UnitHealthMax(unitToHeal)-UnitHealth(unitToHeal)
-		if need > tonumber(arg3) then
-			DEFAULT_CHAT_FRAME:AddMessage(UnitName(unitToHeal).." braucht "..need.." HP. "..arg3.." geheilt. Er braucht noch "..need-arg3.." HP.", 0.0, 1.0, 0.0)
-		elseif need < tonumber(arg3) then
-			DEFAULT_CHAT_FRAME:AddMessage(UnitName(unitToHeal).." braucht "..need.." HP. "..arg3.." geheilt. "..arg3-need.." HP überheilt.", 0.0, 1.0, 0.0)
+		if need > tonumber(value) then
+			DEFAULT_CHAT_FRAME:AddMessage(UnitName(unitToHeal).." braucht "..need.." HP. "..value.." geheilt. Er braucht noch "..need-value.." HP.", 0.0, 1.0, 0.0)
+		elseif need < tonumber(value) then
+			DEFAULT_CHAT_FRAME:AddMessage(UnitName(unitToHeal).." braucht "..need.." HP. "..value.." geheilt. "..value-need.." HP überheilt.", 0.0, 1.0, 0.0)
 		else
-			DEFAULT_CHAT_FRAME:AddMessage(UnitName(unitToHeal).." braucht "..need.." HP. "..arg3.." geheilt.", 0.0, 1.0, 0.0)
+			DEFAULT_CHAT_FRAME:AddMessage(UnitName(unitToHeal).." braucht "..need.." HP. "..value.." geheilt.", 0.0, 1.0, 0.0)
 		end
 	end
 end
@@ -309,4 +316,4 @@ end
 local PallyLogFrame = CreateFrame("FRAME", nil, UIParent)
 PallyLogFrame:Hide()
 PallyLogFrame:SetScript("OnEvent", PallyLog_OnEvent)
-PallyLogFrame:RegisterEvent("COMBAT_TEXT_UPDATE")
+PallyLogFrame:RegisterEvent("CHAT_MSG_SPELL_SELF_BUFF")
